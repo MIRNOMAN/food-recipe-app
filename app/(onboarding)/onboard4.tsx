@@ -1,31 +1,43 @@
-import { View, Text, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
 export default function Onboard4() {
   const router = useRouter();
 
   return (
-    <View className="flex-1 bg-white p-6 justify-between">
-      <View className="items-center mt-20">
-        <View className="w-60 h-60 bg-gray-300 rounded-xl" />
-        <Text className="text-2xl font-bold mt-6 text-center">
-          All your favorites
+    <View className="flex-1 bg-white px-5 justify-between">
+      {/* Top / Center content */}
+      <View className="flex-1 justify-center items-center">
+        <Image
+          source={require("../../assets/onboard/image_2.png")}
+          className="  "
+        />
+        <Text className="text-3xl  font-senBold mt-5 text-center ">
+          Free delivery offers
         </Text>
-        <Text className="text-gray-500 text-center mt-2">
-          Get all your food from one place...
+        <Text className="text-lg font-sen p-4 text-gray-500 mt-2 text-center">
+          Get all your loved foods in one once place, you just place the orer we
+          do the rest
         </Text>
+
+        <View className="flex-row justify-center gap-4 mt-10">
+          <View className="w-4 h-4 bg-[#FFE1CE]  rounded-full" />
+          <View className="w-4 h-4 bg-[#FFE1CE]  rounded-full" />
+          <View className="w-4 h-4 bg-[#FF7622] rounded-full" />
+        </View>
       </View>
 
-      <View className="mb-10">
+      {/* Bottom Buttons */}
+      <View className="mb-20">
         <TouchableOpacity
-          className="bg-orange-500 py-3 rounded-xl"
-          onPress={() => router.push("/(onboarding)/onboard2")}
+          className="bg-orange-500 py-4 rounded-xl"
+          onPress={() => router.push("/auth/login")}
         >
-          <Text className="text-center text-white font-bold">NEXT</Text>
+          <Text className="text-white font-bold text-center">NEXT</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.push("/(onboarding)/onboard2")}>
-          <Text className="text-center mt-4 text-gray-500">Skip</Text>
+        <TouchableOpacity onPress={() => router.push("/auth/login")}>
+          <Text className="text-gray-500 mt-3 text-center">Skip</Text>
         </TouchableOpacity>
       </View>
     </View>

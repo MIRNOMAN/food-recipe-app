@@ -4,7 +4,12 @@ module.exports = {
   content: ["./app/**/*.tsx", "./components/**/*.{js,jsx,ts,tsx}"],
   presets: [require("nativewind/preset")],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        sen: ["SenRegular"],
+        senBold: ["SenBold"],
+      },
+    },
   },
   plugins: [],
 };

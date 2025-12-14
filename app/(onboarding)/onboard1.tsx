@@ -1,87 +1,46 @@
-import { View, Text, TouchableOpacity, Image, StyleSheet, Dimensions } from "react-native";
 import { useRouter } from "expo-router";
-
-const { width, height } = Dimensions.get("window");
+import { Image, Text, TouchableOpacity, View } from "react-native";
 
 export default function Onboard1() {
   const router = useRouter();
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-white px-5 justify-between">
       {/* Top / Center content */}
-      <View style={styles.topContainer}>
+      <View className="flex-1 justify-center items-center">
         <Image
-          source={require("../../assets/splash/Ellipse10.png")}
-          style={styles.image}
-          resizeMode="contain"
+          source={require("../../assets/onboard/image_1.png")}
+          className="w-[300px] h-[180px] rounded-[20px]"
         />
-        <Text style={styles.title}>All your favorites</Text>
-        <Text style={styles.subtitle}>Get all your food from one place...</Text>
+        <Text className="text-3xl  font-senBold mt-5 text-center ">
+          All your favorites
+        </Text>
+        <Text className="text-lg font-sen p-4 text-gray-500 mt-2 text-center">
+          Get all your loved foods in one once place, you just place the orer we
+          do the rest
+        </Text>
+
+        <View className="flex-row justify-center gap-4 mt-10">
+          <View className="w-4 h-4 bg-[#FF7622] rounded-full" />
+          <View className="w-4 h-4 bg-[#FFE1CE] rounded-full" />
+          <View className="w-4 h-4 bg-[#FFE1CE] rounded-full" />
+         
+        </View>
       </View>
 
       {/* Bottom Buttons */}
-      <View style={styles.bottomContainer}>
+      <View className="mb-20">
         <TouchableOpacity
-          style={styles.nextButton}
-          onPress={() => router.push("/(onboarding)/onboard2")}
+          className="bg-orange-500 py-4 rounded-xl"
+          onPress={() => router.push("/(onboarding)/onboard3")}
         >
-          <Text style={styles.nextText}>NEXT</Text>
+          <Text className="text-white font-bold text-center">NEXT</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => router.push("/(onboarding)/onboard2")}>
-          <Text style={styles.skipText}>Skip</Text>
+        <TouchableOpacity onPress={() => router.push("/auth/login")}>
+          <Text className="text-gray-500 mt-3 text-center">Skip</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    padding: 20,
-    justifyContent: "space-between", // top and bottom separation
-  },
-  topContainer: {
-    flex: 1,
-    justifyContent: "center", // center vertically
-    alignItems: "center",     // center horizontally
-  },
-  image: {
-    width: width * 0.6,
-    height: width * 0.6,
-    borderRadius: 20,
-    backgroundColor: "#ccc", // placeholder bg
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginTop: 20,
-    textAlign: "center",
-  },
-  subtitle: {
-    fontSize: 16,
-    color: "#888",
-    marginTop: 8,
-    textAlign: "center",
-  },
-  bottomContainer: {
-    marginBottom: 30,
-  },
-  nextButton: {
-    backgroundColor: "#f97316",
-    paddingVertical: 15,
-    borderRadius: 15,
-  },
-  nextText: {
-    color: "#fff",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  skipText: {
-    color: "#888",
-    marginTop: 10,
-    textAlign: "center",
-  },
-});
