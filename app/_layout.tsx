@@ -8,6 +8,7 @@ import { Text as RNText, TextStyle } from "react-native";
 import "react-native-gesture-handler";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
+import { tokenCache } from '@clerk/clerk-expo/token-cache'
 
 const RootLayout: React.FC = () => {
   const [fontsLoaded] = useFonts({
@@ -24,7 +25,7 @@ const RootLayout: React.FC = () => {
   };
 
   return (
-    <ClerkProvider publishableKey="pk_test_bW9kZWwtd2VldmlsLTQxLmNsZXJrLmFjY291bnRzLmRldiQ">
+    <ClerkProvider tokenCache={tokenCache}>
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
           <Stack

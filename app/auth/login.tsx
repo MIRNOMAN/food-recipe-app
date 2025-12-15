@@ -2,44 +2,65 @@ import { Ionicons } from "@expo/vector-icons";
 import { Link, useNavigation } from "expo-router";
 import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { useState } from "react";
-import Toast from "react-native-toast-message"; 
+import Toast from "react-native-toast-message";
 import { NavigationProp } from "@react-navigation/native";
+import { useSignIn } from "@clerk/clerk-expo";
 
 type RootStackParamList = {
   home: undefined;
 };
 
 export default function Login() {
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const { signIn, setActive, isLoaded } = useSignIn();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
-  const handleLogin = () => {
-    // Here you can add your authentication logic
+  const handleLogin = async () => {
+    if (!isLoaded) return;
 
-    // Example: show success toast
-    Toast.show({
-      type: "success",
-      text1: "Login Successful",
-      text2: "Welcome back!",
-      position: "top",
-    });
+    try {
+      const result = await signIn.create({
+        identifier: email,
+        password,
+      });
 
-    // Example: navigate to home after login (optional)
-    setTimeout(() => navigation.navigate("home"), 1500);
+      if (result.status === "complete") {
+        await setActive({ session: result.createdSessionId });
+
+        Toast.show({
+          type: "success",
+          text1: "Login Successful",
+          text2: "Welcome back!",
+          position: "top",
+        });
+
+        setTimeout(() => navigation.navigate("home"), 1000);
+      }
+    } catch (err: any) {
+      Toast.show({
+        type: "error",
+        text1: "Login Failed",
+        text2: err.errors?.[0]?.message || "Invalid credentials",
+        position: "top",
+      });
+    }
   };
 
   return (
     <View className="flex-1 relative bg-[#0D0D28]">
-      {/* Top Left Image */}
+      {/* Top Image */}
       <Image
         source={require("../../assets/splash/Ellipse1005.png")}
         className="absolute w-[250px] h-[250px] -top-24 left-0"
         resizeMode="contain"
       />
 
-      {/* Top Section */}
+      {/* Header */}
       <View className="flex-1 justify-center px-6">
-        <Text className="text-white text-4xl font-senBold  text-center">
+        <Text className="text-white text-4xl font-senBold text-center">
           Log In
         </Text>
         <Text className="text-gray-300 font-sen text-center mt-2">
@@ -47,11 +68,13 @@ export default function Login() {
         </Text>
       </View>
 
-      {/* Card Section */}
+      {/* Card */}
       <View className="bg-white rounded-t-3xl h-[600px] px-6 pt-10 pb-10">
         {/* Email */}
         <Text className="text-gray-500 font-sen text-sm mb-3">EMAIL</Text>
         <TextInput
+          value={email}
+          onChangeText={setEmail}
           placeholder="example@gmail.com"
           placeholderTextColor="#9CA3AF"
           className="bg-gray-100 px-4 py-4 rounded-xl mb-7"
@@ -61,6 +84,8 @@ export default function Login() {
         <Text className="text-gray-500 font-sen text-sm mb-4">PASSWORD</Text>
         <View className="bg-gray-100 rounded-xl px-4 py-3 flex-row items-center justify-between mb-5">
           <TextInput
+            value={password}
+            onChangeText={setPassword}
             placeholder="********"
             placeholderTextColor="#9CA3AF"
             secureTextEntry={!showPassword}
@@ -75,11 +100,13 @@ export default function Login() {
           </TouchableOpacity>
         </View>
 
-        {/* Remember & Forgot */}
+        {/* Forgot Password */}
         <View className="flex-row justify-between items-center mb-8">
           <View className="flex-row items-center">
             <View className="w-5 h-5 border border-gray-400 rounded mr-2" />
-            <Text className="text-gray-500 text-md font-sen">Remember me</Text>
+            <Text className="text-gray-500 text-md font-sen">
+              Remember me
+            </Text>
           </View>
 
           <Link
@@ -92,7 +119,7 @@ export default function Login() {
 
         {/* Login Button */}
         <TouchableOpacity
-          onPress={handleLogin} // ✅ Show toast on login
+          onPress={handleLogin}
           className="bg-orange-500 py-4 rounded-xl mb-8"
         >
           <Text className="text-white text-center font-senBold text-base">
@@ -108,27 +135,7 @@ export default function Login() {
             SIGN UP
           </Link>
         </Text>
-
-        {/* Divider */}
-        <Text className="text-center text-gray-400 mb-6">Or</Text>
-
-        {/* Social Icons */}
-        <View className="flex-row justify-center gap-8">
-          <View className="w-14 h-14 rounded-full bg-blue-600 justify-center items-center">
-            <Ionicons name="logo-facebook" size={22} color="white" />
-          </View>
-
-          <View className="w-14 h-14 rounded-full bg-sky-500 justify-center items-center">
-            <Ionicons name="logo-twitter" size={22} color="white" />
-          </View>
-
-          <View className="w-14 h-14 rounded-full bg-black justify-center items-center">
-            <Ionicons name="logo-apple" size={22} color="white" />
-          </View>
-        </View>
       </View>
-
-   
     </View>
   );
 }

@@ -1,20 +1,18 @@
 import { useSignUp } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useState } from "react";
-import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Image,
+  KeyboardAvoidingView,
+
+  Platform,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Toast from "react-native-toast-message";
-
-type RootStackParamList = {
-  login: undefined;
-  signup: undefined;
-};
-
-type SignupNavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  "signup"
->;
+import Modal from 'react-native-modal';
 
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,57 +23,84 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const navigation = useNavigation<SignupNavigationProp>();
+  const [otpModalVisible, setOtpModalVisible] = useState(false);
+  const [code, setCode] = useState("");
+
   const { signUp, isLoaded } = useSignUp();
 
+  // SIGNUP ACTION
   const handleSignup = async () => {
     if (!name || !email || !password || !confirmPassword) {
-      Toast.show({
-        type: "error",
-        text1: "All fields are required",
-      });
-      return;
+      return Toast.show({ type: "error", text1: "All fields required" });
     }
 
     if (password !== confirmPassword) {
-      Toast.show({
-        type: "error",
-        text1: "Passwords do not match",
-      });
-      return;
+      return Toast.show({ type: "error", text1: "Passwords do not match" });
     }
 
     try {
-      if (!isLoaded) return;
+      if (!isLoaded) {
+        Toast.show({ type: "error", text1: "SignUp not ready, try again" });
+        return;
+      }
 
+      // Create new account
       await signUp.create({
         emailAddress: email,
-        password: password,
+        password,
+        firstName: name.split(" ")[0] || name,
+        lastName: name.split(" ")[1] || "",
       });
 
-      await signUp.prepareEmailAddressVerification({
-        strategy: "email_code",
-      });
+      // Prepare verification
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
 
       Toast.show({
         type: "success",
-        text1: "Account created!",
-        text2: "Check your email to verify your account 👋",
+        text1: "Verification code sent!",
       });
 
-      navigation.navigate("login");
+      // Show OTP modal
+      setOtpModalVisible(true);
     } catch (err: any) {
       Toast.show({
         type: "error",
-        text1: "Signup failed",
-        text2: err.errors ? err.errors[0].longMessage : err.message,
+        text1: "Signup failed!",
+        text2: err?.errors?.[0]?.longMessage || err?.message,
+      });
+    }
+  };
+
+  // OTP VERIFY ACTION
+  const handleVerify = async () => {
+    if (!code) {
+      return Toast.show({ type: "error", text1: "Enter verification code" });
+    }
+
+    try {
+      if (!signUp) return;
+
+      await signUp.attemptEmailAddressVerification({ code });
+
+      Toast.show({
+        type: "success",
+        text1: "Account verified!",
+      });
+
+      setOtpModalVisible(false);
+      setCode("");
+      // Optionally clear fields or navigate
+    } catch (err: any) {
+      Toast.show({
+        type: "error",
+        text1: "Verification failed",
+        text2: err?.errors?.[0]?.longMessage || "Invalid code",
       });
     }
   };
 
   return (
     <View className="flex-1 relative bg-[#0D0D28]">
-      {/* Top Left Image */}
       <Image
         source={require("../../assets/splash/Ellipse1005.png")}
         className="absolute w-[250px] h-[250px] -top-24 left-0"
@@ -87,15 +112,15 @@ export default function Signup() {
         <Text className="text-white text-4xl font-senBold text-center">
           Sign Up
         </Text>
-        <Text className="text-gray-300 font-sen text-center text-lg mt-2">
+        <Text className="text-gray-300 text-center mt-2">
           Create a new account to get started
         </Text>
       </View>
 
       {/* Card */}
-      <View className="bg-white rounded-t-3xl h-[650px] px-6 pt-10 pb-8">
+      <View className="bg-white rounded-t-3xl px-6 pt-10 pb-8">
         {/* Name */}
-        <Text className="text-gray-500 font-sen text-sm mb-3">NAME</Text>
+        <Text className="text-gray-500 mb-3">NAME</Text>
         <TextInput
           placeholder="John Doe"
           placeholderTextColor="#9CA3AF"
@@ -105,17 +130,18 @@ export default function Signup() {
         />
 
         {/* Email */}
-        <Text className="text-gray-500 font-sen text-sm mb-3">EMAIL</Text>
+        <Text className="text-gray-500 mb-3">EMAIL</Text>
         <TextInput
           placeholder="example@gmail.com"
           placeholderTextColor="#9CA3AF"
           value={email}
           onChangeText={setEmail}
           className="bg-gray-100 px-4 py-4 rounded-xl mb-7"
+          keyboardType="email-address"
         />
 
         {/* Password */}
-        <Text className="text-gray-500 font-sen text-sm mb-3">PASSWORD</Text>
+        <Text className="text-gray-500 mb-3">PASSWORD</Text>
         <View className="bg-gray-100 rounded-xl px-4 py-3 flex-row items-center justify-between mb-7">
           <TextInput
             placeholder="********"
@@ -135,9 +161,7 @@ export default function Signup() {
         </View>
 
         {/* Confirm Password */}
-        <Text className="text-gray-500 font-sen text-sm mb-3">
-          CONFIRM PASSWORD
-        </Text>
+        <Text className="text-gray-500 mb-3">CONFIRM PASSWORD</Text>
         <View className="bg-gray-100 rounded-xl px-4 py-3 flex-row items-center justify-between mb-7">
           <TextInput
             placeholder="********"
@@ -160,26 +184,67 @@ export default function Signup() {
 
         {/* Sign Up Button */}
         <TouchableOpacity
-          className="bg-orange-500 py-4 rounded-xl mb-8"
+          className="bg-orange-500 py-4 rounded-xl mb-5"
           onPress={handleSignup}
         >
-          <Text className="text-white text-center font-senBold text-base">
-            SIGN UP
-          </Text>
+          <Text className="text-white text-center font-bold">SIGN UP</Text>
         </TouchableOpacity>
-
-        {/* Login */}
-        <Text className="text-center font-sen text-gray-500 mb-6">
-          Already have an account?
-          <Text
-            onPress={() => navigation.navigate("login")}
-            className="text-orange-500 font-bold"
-          >
-            {" "}
-            LOG IN
-          </Text>
-        </Text>
       </View>
+
+      {/* OTP Modal using react-native-modal */}
+      <Modal
+        isVisible={otpModalVisible}
+        backdropOpacity={0.6}
+        animationIn="slideInUp"
+        animationOut="slideOutDown"
+        onBackdropPress={() => setOtpModalVisible(false)}
+      >
+       <View className="flex-1 justify-center items-center">
+
+         <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          className="items-center justify-center"
+        >
+          <View className="bg-white rounded-2xl flex-1 p-6">
+            <Text className="text-xl font-bold text-center mb-4">
+              Verify Email
+            </Text>
+
+            <Text className="text-gray-700 text-center mb-4">
+              A verification code has been sent to:
+              {"\n"}
+              <Text className="font-bold">{email}</Text>
+            </Text>
+
+            <TextInput
+              placeholder="Enter 6-digit code"
+              placeholderTextColor="#9CA3AF"
+              value={code}
+              onChangeText={setCode}
+              keyboardType="number-pad"
+              maxLength={6}
+              className="bg-gray-100 px-4 py-4 rounded-xl text-center text-lg tracking-widest mb-5"
+            />
+
+            <TouchableOpacity
+              onPress={handleVerify}
+              className="bg-orange-500 py-3 rounded-xl mb-3"
+            >
+              <Text className="text-white text-center font-bold">VERIFY</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => setOtpModalVisible(false)}
+              className="py-2"
+            >
+              <Text className="text-center text-gray-500 font-semibold">
+                Cancel
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+       </View>
+      </Modal>
     </View>
   );
 }
