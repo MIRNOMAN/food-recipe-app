@@ -1,26 +1,91 @@
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
-import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+  Image,
+  Keyboard,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useNavigation, NavigationProp } from "@react-navigation/native"; // <-- for navigation
+
+type RootStackParamList = {
+  otp: undefined;
+};
 
 export default function Forgot() {
-  const router = useRouter();
+  const [cardHeight, setCardHeight] = useState<number | undefined>(undefined);
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", () => {
+      setCardHeight(560);
+    });
+
+    const hideSub = Keyboard.addListener("keyboardDidHide", () => {
+      setCardHeight(undefined);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   return (
-    <View className="flex-1 bg-[#0D0D28] p-6 justify-center">
-
-      <Text className="text-white text-3xl font-bold mb-6">Forgot Password</Text>
-
-      <TextInput
-        placeholder="Enter your email"
-        className="bg-white p-3 rounded-xl mb-6"
+    <View className="flex-1 relative bg-[#0D0D28]">
+      {/* Top Left Image */}
+      <Image
+        source={require("../../assets/splash/Ellipse1005.png")}
+        className="absolute w-[250px] h-[250px] -top-24 left-0"
+        resizeMode="contain"
       />
 
+      {/* Back Button */}
       <TouchableOpacity
-        className="bg-orange-500 p-3 rounded-xl"
-        onPress={() => router.push("/auth/otp")}
+        onPress={() => navigation.goBack()} // <-- correct navigation
+        className="absolute top-0 left-0 mt-16 ml-4 w-12 h-12 bg-white rounded-full justify-center items-center shadow"
       >
-        <Text className="text-center text-white font-bold">SEND OTP</Text>
+        <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
       </TouchableOpacity>
 
+      {/* Top Section */}
+      <View className="flex-1 justify-center px-6">
+        <Text className="text-white text-4xl font-senBold text-center">
+          Forgot Password
+        </Text>
+        <Text className="text-gray-300 font-sen text-center text-lg mt-2">
+          Please enter your email to reset your password
+        </Text>
+      </View>
+
+      {/* Card Section */}
+      <View
+        style={{ height: cardHeight }}
+        className="bg-white rounded-t-3xl px-6 pt-10 pb-8"
+      >
+        {/* Email */}
+        <Text className="text-gray-500 font-sen text-sm mb-3">EMAIL</Text>
+
+        <TextInput
+          autoFocus
+          placeholder="example@gmail.com"
+          placeholderTextColor="#9CA3AF"
+          className="bg-gray-100 px-4 py-4 rounded-xl mb-7"
+        />
+
+        {/* Send Code Button */}
+        <TouchableOpacity
+          onPress={() => navigation.navigate("otp")}
+          className="bg-orange-500 py-4 rounded-xl mb-8"
+        >
+          <Text className="text-white text-center uppercase font-senBold text-base">
+            Send Code
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
