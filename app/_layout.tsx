@@ -6,6 +6,7 @@ import React from "react";
 import { Text as RNText, TextStyle } from "react-native";
 import "react-native-gesture-handler"; 
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 
 const RootLayout: React.FC = () => {
   const [fontsLoaded] = useFonts({
@@ -30,6 +31,7 @@ const RootLayout: React.FC = () => {
             headerShown: false,
           }}
         />
+         <Toast />
       </SafeAreaView>
     </SafeAreaProvider>
   );

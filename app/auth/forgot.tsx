@@ -9,7 +9,8 @@ import {
 } from "react-native";
 
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { useNavigation, NavigationProp } from "@react-navigation/native"; // <-- for navigation
+import { useNavigation, NavigationProp } from "@react-navigation/native";
+import Toast from "react-native-toast-message"; 
 
 type RootStackParamList = {
   otp: undefined;
@@ -18,6 +19,7 @@ type RootStackParamList = {
 export default function Forgot() {
   const [cardHeight, setCardHeight] = useState<number | undefined>(undefined);
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
     const showSub = Keyboard.addListener("keyboardDidShow", () => {
@@ -34,6 +36,30 @@ export default function Forgot() {
     };
   }, []);
 
+  const handleSendCode = () => {
+    if (!email) {
+      // Show error if email is empty
+      Toast.show({
+        type: "error",
+        text1: "Email Required",
+        text2: "Please enter your email address",
+        position: "top",
+      });
+      return;
+    }
+
+    // ✅ Show success toast
+    Toast.show({
+      type: "success",
+      text1: "Code Sent",
+      text2: "Check your email for the OTP code",
+      position: "top",
+    });
+
+   
+    setTimeout(() => navigation.navigate("otp"), 1500);
+  };
+
   return (
     <View className="flex-1 relative bg-[#0D0D28]">
       {/* Top Left Image */}
@@ -45,7 +71,7 @@ export default function Forgot() {
 
       {/* Back Button */}
       <TouchableOpacity
-        onPress={() => navigation.goBack()} // <-- correct navigation
+        onPress={() => navigation.goBack()}
         className="absolute top-0 left-0 mt-16 ml-4 w-12 h-12 bg-white rounded-full justify-center items-center shadow"
       >
         <MaterialCommunityIcons name="arrow-left" size={24} color="black" />
@@ -74,11 +100,13 @@ export default function Forgot() {
           placeholder="example@gmail.com"
           placeholderTextColor="#9CA3AF"
           className="bg-gray-100 px-4 py-4 rounded-xl mb-7"
+          value={email}
+          onChangeText={setEmail}
         />
 
         {/* Send Code Button */}
         <TouchableOpacity
-          onPress={() => navigation.navigate("otp")}
+          onPress={handleSendCode}
           className="bg-orange-500 py-4 rounded-xl mb-8"
         >
           <Text className="text-white text-center uppercase font-senBold text-base">
@@ -86,6 +114,8 @@ export default function Forgot() {
           </Text>
         </TouchableOpacity>
       </View>
+
+    
     </View>
   );
 }

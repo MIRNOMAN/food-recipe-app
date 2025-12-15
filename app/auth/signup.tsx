@@ -1,8 +1,13 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Link } from "expo-router";
+import { useState } from "react";
 import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
+import Toast from "react-native-toast-message";
+
 
 export default function Signup() {
+  const [showPassword, setShowPassword] = useState(false);
+
   return (
     <View className="flex-1 relative bg-[#0D0D28]">
       {/* Top Left Image */}
@@ -14,7 +19,7 @@ export default function Signup() {
 
       {/* Top Section */}
       <View className="flex-1 justify-center px-6">
-        <Text className="text-white text-4xl font-senBold  text-center">
+        <Text className="text-white text-4xl font-senBold text-center">
           Sign Up
         </Text>
         <Text className="text-gray-300 font-sen text-center text-lg mt-2">
@@ -24,13 +29,14 @@ export default function Signup() {
 
       {/* Card Section */}
       <View className="bg-white rounded-t-3xl h-[600px] px-6 pt-10 pb-8">
-        {/* Email */}
+        {/* Name */}
         <Text className="text-gray-500 font-sen text-sm mb-3">NAME</Text>
         <TextInput
           placeholder="John Doe"
           placeholderTextColor="#9CA3AF"
           className="bg-gray-100 px-4 py-4 rounded-xl mb-7"
         />
+
         {/* Email */}
         <Text className="text-gray-500 font-sen text-sm mb-3">EMAIL</Text>
         <TextInput
@@ -45,20 +51,37 @@ export default function Signup() {
           <TextInput
             placeholder="********"
             placeholderTextColor="#9CA3AF"
-            secureTextEntry
+            secureTextEntry={!showPassword}
             className="flex-1"
           />
-          <Ionicons name="eye-outline" size={20} color="#9CA3AF" />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <Ionicons
+              name={showPassword ? "eye-off-outline" : "eye-outline"}
+              size={20}
+              color="#9CA3AF"
+            />
+          </TouchableOpacity>
         </View>
 
-        {/* Login Button */}
-        <TouchableOpacity className="bg-orange-500 py-4 rounded-xl mb-8">
+        {/* Sign Up Button */}
+        <TouchableOpacity
+          className="bg-orange-500 py-4 rounded-xl mb-8"
+          onPress={() => {
+            // Show success toast
+            Toast.show({
+              type: "success",
+              text1: "Account created successfully!",
+              text2: "Welcome to our app 👋",
+              position: "top",
+            });
+          }}
+        >
           <Text className="text-white text-center font-senBold text-base">
             SIGN UP
           </Text>
         </TouchableOpacity>
 
-        {/* Signup */}
+        {/* Already have an account */}
         <Text className="text-center font-sen text-gray-500 mb-6">
           Already have an account?
           <Link href="/auth/login" className="text-orange-500 font-bold">

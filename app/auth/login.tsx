@@ -1,8 +1,33 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Link } from "expo-router";
+import { Link, useNavigation } from "expo-router";
 import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useState } from "react";
+import Toast from "react-native-toast-message"; 
+import { NavigationProp } from "@react-navigation/native";
+
+type RootStackParamList = {
+  home: undefined;
+};
 
 export default function Login() {
+  const [showPassword, setShowPassword] = useState(false);
+    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+
+  const handleLogin = () => {
+    // Here you can add your authentication logic
+
+    // Example: show success toast
+    Toast.show({
+      type: "success",
+      text1: "Login Successful",
+      text2: "Welcome back!",
+      position: "top",
+    });
+
+    // Example: navigate to home after login (optional)
+    setTimeout(() => navigation.navigate("home"), 1500);
+  };
+
   return (
     <View className="flex-1 relative bg-[#0D0D28]">
       {/* Top Left Image */}
@@ -38,10 +63,16 @@ export default function Login() {
           <TextInput
             placeholder="********"
             placeholderTextColor="#9CA3AF"
-            secureTextEntry
+            secureTextEntry={!showPassword}
             className="flex-1"
           />
-          <Ionicons name="eye-outline" size={20} color="#9CA3AF" />
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <Ionicons
+              name={showPassword ? "eye-off-outline" : "eye-outline"}
+              size={20}
+              color="#9CA3AF"
+            />
+          </TouchableOpacity>
         </View>
 
         {/* Remember & Forgot */}
@@ -60,7 +91,10 @@ export default function Login() {
         </View>
 
         {/* Login Button */}
-        <TouchableOpacity className="bg-orange-500 py-4 rounded-xl mb-8">
+        <TouchableOpacity
+          onPress={handleLogin} // ✅ Show toast on login
+          className="bg-orange-500 py-4 rounded-xl mb-8"
+        >
           <Text className="text-white text-center font-senBold text-base">
             LOG IN
           </Text>
@@ -93,6 +127,8 @@ export default function Login() {
           </View>
         </View>
       </View>
+
+   
     </View>
   );
 }

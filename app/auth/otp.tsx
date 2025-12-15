@@ -10,12 +10,11 @@ import {
 
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { NavigationProp, useNavigation } from "@react-navigation/native";
+import Toast from "react-native-toast-message"; // ✅ Import Toast
 
 // Define your navigator routes here
 type RootStackParamList = {
-  otp: undefined;
-  home: undefined;
-  login: undefined;
+  reset: undefined;
 };
 
 export default function OTP() {
@@ -59,6 +58,32 @@ export default function OTP() {
     if (nativeEvent.key === "Backspace" && otp[index] === "" && index > 0) {
       inputsRef.current[index - 1].focus();
     }
+  };
+
+  const handleVerify = () => {
+    // You can add real OTP verification logic here
+    const isOtpComplete = otp.every((digit) => digit !== "");
+
+    if (!isOtpComplete) {
+      Toast.show({
+        type: "error",
+        text1: "Incomplete OTP",
+        text2: "Please enter all 4 digits",
+        position: "top",
+      });
+      return;
+    }
+
+    // ✅ Show success toast
+    Toast.show({
+      type: "success",
+      text1: "OTP Verified",
+      text2: "You can now reset your password",
+      position: "top",
+    });
+
+    // Navigate to Reset screen after a short delay
+    setTimeout(() => navigation.navigate("reset"), 1500);
   };
 
   return (
@@ -114,9 +139,9 @@ export default function OTP() {
           ))}
         </View>
 
-        {/* Verify Button */}
+    
         <TouchableOpacity
-          onPress={() => navigation.navigate("login")}
+          onPress={handleVerify} 
           className="bg-orange-500 py-4 rounded-xl mb-8"
         >
           <Text className="text-white text-center uppercase font-senBold text-base">
@@ -124,6 +149,9 @@ export default function OTP() {
           </Text>
         </TouchableOpacity>
       </View>
+
+    
+   
     </View>
   );
 }
