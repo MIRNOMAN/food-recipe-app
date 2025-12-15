@@ -1,12 +1,77 @@
+import { useSignUp } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
-import { Link } from "expo-router";
+import { useNavigation } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useState } from "react";
 import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Toast from "react-native-toast-message";
 
+type RootStackParamList = {
+  login: undefined;
+  signup: undefined;
+};
+
+type SignupNavigationProp = NativeStackNavigationProp<
+  RootStackParamList,
+  "signup"
+>;
 
 export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const navigation = useNavigation<SignupNavigationProp>();
+  const { signUp, isLoaded } = useSignUp();
+
+  const handleSignup = async () => {
+    if (!name || !email || !password || !confirmPassword) {
+      Toast.show({
+        type: "error",
+        text1: "All fields are required",
+      });
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Toast.show({
+        type: "error",
+        text1: "Passwords do not match",
+      });
+      return;
+    }
+
+    try {
+      if (!isLoaded) return;
+
+      await signUp.create({
+        emailAddress: email,
+        password: password,
+      });
+
+      await signUp.prepareEmailAddressVerification({
+        strategy: "email_code",
+      });
+
+      Toast.show({
+        type: "success",
+        text1: "Account created!",
+        text2: "Check your email to verify your account 👋",
+      });
+
+      navigation.navigate("login");
+    } catch (err: any) {
+      Toast.show({
+        type: "error",
+        text1: "Signup failed",
+        text2: err.errors ? err.errors[0].longMessage : err.message,
+      });
+    }
+  };
 
   return (
     <View className="flex-1 relative bg-[#0D0D28]">
@@ -27,13 +92,15 @@ export default function Signup() {
         </Text>
       </View>
 
-      {/* Card Section */}
-      <View className="bg-white rounded-t-3xl h-[600px] px-6 pt-10 pb-8">
+      {/* Card */}
+      <View className="bg-white rounded-t-3xl h-[650px] px-6 pt-10 pb-8">
         {/* Name */}
         <Text className="text-gray-500 font-sen text-sm mb-3">NAME</Text>
         <TextInput
           placeholder="John Doe"
           placeholderTextColor="#9CA3AF"
+          value={name}
+          onChangeText={setName}
           className="bg-gray-100 px-4 py-4 rounded-xl mb-7"
         />
 
@@ -42,22 +109,50 @@ export default function Signup() {
         <TextInput
           placeholder="example@gmail.com"
           placeholderTextColor="#9CA3AF"
+          value={email}
+          onChangeText={setEmail}
           className="bg-gray-100 px-4 py-4 rounded-xl mb-7"
         />
 
         {/* Password */}
-        <Text className="text-gray-500 font-sen text-sm mb-4">PASSWORD</Text>
-        <View className="bg-gray-100 rounded-xl px-4 py-3 flex-row items-center justify-between mb-5">
+        <Text className="text-gray-500 font-sen text-sm mb-3">PASSWORD</Text>
+        <View className="bg-gray-100 rounded-xl px-4 py-3 flex-row items-center justify-between mb-7">
           <TextInput
             placeholder="********"
             placeholderTextColor="#9CA3AF"
             secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
             className="flex-1"
           />
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
             <Ionicons
               name={showPassword ? "eye-off-outline" : "eye-outline"}
-              size={20}
+              size={22}
+              color="#9CA3AF"
+            />
+          </TouchableOpacity>
+        </View>
+
+        {/* Confirm Password */}
+        <Text className="text-gray-500 font-sen text-sm mb-3">
+          CONFIRM PASSWORD
+        </Text>
+        <View className="bg-gray-100 rounded-xl px-4 py-3 flex-row items-center justify-between mb-7">
+          <TextInput
+            placeholder="********"
+            placeholderTextColor="#9CA3AF"
+            secureTextEntry={!showConfirmPassword}
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            className="flex-1"
+          />
+          <TouchableOpacity
+            onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+          >
+            <Ionicons
+              name={showConfirmPassword ? "eye-off-outline" : "eye-outline"}
+              size={22}
               color="#9CA3AF"
             />
           </TouchableOpacity>
@@ -66,47 +161,24 @@ export default function Signup() {
         {/* Sign Up Button */}
         <TouchableOpacity
           className="bg-orange-500 py-4 rounded-xl mb-8"
-          onPress={() => {
-            // Show success toast
-            Toast.show({
-              type: "success",
-              text1: "Account created successfully!",
-              text2: "Welcome to our app 👋",
-              position: "top",
-            });
-          }}
+          onPress={handleSignup}
         >
           <Text className="text-white text-center font-senBold text-base">
             SIGN UP
           </Text>
         </TouchableOpacity>
 
-        {/* Already have an account */}
+        {/* Login */}
         <Text className="text-center font-sen text-gray-500 mb-6">
           Already have an account?
-          <Link href="/auth/login" className="text-orange-500 font-bold">
+          <Text
+            onPress={() => navigation.navigate("login")}
+            className="text-orange-500 font-bold"
+          >
             {" "}
             LOG IN
-          </Link>
+          </Text>
         </Text>
-
-        {/* Divider */}
-        <Text className="text-center text-gray-400 mb-6">Or</Text>
-
-        {/* Social Icons */}
-        <View className="flex-row justify-center gap-8">
-          <View className="w-14 h-14 rounded-full bg-blue-600 justify-center items-center">
-            <Ionicons name="logo-facebook" size={22} color="white" />
-          </View>
-
-          <View className="w-14 h-14 rounded-full bg-sky-500 justify-center items-center">
-            <Ionicons name="logo-twitter" size={22} color="white" />
-          </View>
-
-          <View className="w-14 h-14 rounded-full bg-black justify-center items-center">
-            <Ionicons name="logo-apple" size={22} color="white" />
-          </View>
-        </View>
       </View>
     </View>
   );
