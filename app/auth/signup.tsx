@@ -1,10 +1,10 @@
 import { useSignUp } from "@clerk/clerk-expo";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
+import { useRouter } from "expo-router";
 import {
   Image,
   KeyboardAvoidingView,
-
   Platform,
   Text,
   TextInput,
@@ -12,9 +12,10 @@ import {
   View,
 } from "react-native";
 import Toast from "react-native-toast-message";
-import Modal from 'react-native-modal';
 
 export default function Signup() {
+  const router = useRouter();
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -23,10 +24,8 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [otpModalVisible, setOtpModalVisible] = useState(false);
-  const [code, setCode] = useState("");
-
   const { signUp, isLoaded } = useSignUp();
+  const [loading, setLoading] = useState(false);
 
   // SIGNUP ACTION
   const handleSignup = async () => {
@@ -44,6 +43,8 @@ export default function Signup() {
         return;
       }
 
+      setLoading(true);
+
       // Create new account
       await signUp.create({
         emailAddress: email,
@@ -52,50 +53,23 @@ export default function Signup() {
         lastName: name.split(" ")[1] || "",
       });
 
-      // Prepare verification
-      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
-
       Toast.show({
         type: "success",
-        text1: "Verification code sent!",
+        text1: "Signup successful!",
+        text2: "You can now login.",
       });
 
-      // Show OTP modal
-      setOtpModalVisible(true);
+      // Redirect to login page
+      router.replace("/auth/login");
+
     } catch (err: any) {
       Toast.show({
         type: "error",
         text1: "Signup failed!",
         text2: err?.errors?.[0]?.longMessage || err?.message,
       });
-    }
-  };
-
-  // OTP VERIFY ACTION
-  const handleVerify = async () => {
-    if (!code) {
-      return Toast.show({ type: "error", text1: "Enter verification code" });
-    }
-
-    try {
-      if (!signUp) return;
-
-      await signUp.attemptEmailAddressVerification({ code });
-
-      Toast.show({
-        type: "success",
-        text1: "Account verified!",
-      });
-
-      setOtpModalVisible(false);
-      setCode("");
-      // Optionally clear fields or navigate
-    } catch (err: any) {
-      Toast.show({
-        type: "error",
-        text1: "Verification failed",
-        text2: err?.errors?.[0]?.longMessage || "Invalid code",
-      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -186,65 +160,13 @@ export default function Signup() {
         <TouchableOpacity
           className="bg-orange-500 py-4 rounded-xl mb-5"
           onPress={handleSignup}
+          disabled={loading}
         >
-          <Text className="text-white text-center font-bold">SIGN UP</Text>
+          <Text className="text-white text-center font-bold">
+            {loading ? "PLEASE WAIT..." : "SIGN UP"}
+          </Text>
         </TouchableOpacity>
       </View>
-
-      {/* OTP Modal using react-native-modal */}
-      <Modal
-        isVisible={otpModalVisible}
-        backdropOpacity={0.6}
-        animationIn="slideInUp"
-        animationOut="slideOutDown"
-        onBackdropPress={() => setOtpModalVisible(false)}
-      >
-       <View className="flex-1 justify-center items-center">
-
-         <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
-          className="items-center justify-center"
-        >
-          <View className="bg-white rounded-2xl flex-1 p-6">
-            <Text className="text-xl font-bold text-center mb-4">
-              Verify Email
-            </Text>
-
-            <Text className="text-gray-700 text-center mb-4">
-              A verification code has been sent to:
-              {"\n"}
-              <Text className="font-bold">{email}</Text>
-            </Text>
-
-            <TextInput
-              placeholder="Enter 6-digit code"
-              placeholderTextColor="#9CA3AF"
-              value={code}
-              onChangeText={setCode}
-              keyboardType="number-pad"
-              maxLength={6}
-              className="bg-gray-100 px-4 py-4 rounded-xl text-center text-lg tracking-widest mb-5"
-            />
-
-            <TouchableOpacity
-              onPress={handleVerify}
-              className="bg-orange-500 py-3 rounded-xl mb-3"
-            >
-              <Text className="text-white text-center font-bold">VERIFY</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => setOtpModalVisible(false)}
-              className="py-2"
-            >
-              <Text className="text-center text-gray-500 font-semibold">
-                Cancel
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </KeyboardAvoidingView>
-       </View>
-      </Modal>
     </View>
   );
 }
