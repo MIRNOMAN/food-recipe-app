@@ -4,8 +4,7 @@ import { useState } from "react";
 import { useRouter } from "expo-router";
 import {
   Image,
-  KeyboardAvoidingView,
-  Platform,
+
   Text,
   TextInput,
   TouchableOpacity,
