@@ -1,30 +1,27 @@
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-} from "react-native";
-import React, { useEffect, useState } from "react";
-import { AntDesign, Feather, Ionicons } from "@expo/vector-icons";
 import CategoriesList from "@/components/CategoriesList";
 import RestaurantCard from "@/components/RestaurantCard";
-
+import { Feather, Ionicons } from "@expo/vector-icons";
+import {  useRouter } from "expo-router"; // Use expo-router for navigation
+import React, { useEffect, useState } from "react";
+import {
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 type Meal = {
   idMeal: string;
   strMeal: string;
   strMealThumb: string;
   strCategory: string;
-  // add other fields you need
 };
-
-
 
 export default function Home() {
   const [meals, setMeals] = useState<Meal[]>([]);
+ const router = useRouter();
 
-  // Fetch meals from TheMealDB
   useEffect(() => {
     const fetchMeals = async () => {
       try {
@@ -37,7 +34,6 @@ export default function Home() {
         console.error("Failed to fetch meals:", error);
       }
     };
-
     fetchMeals();
   }, []);
 
@@ -50,10 +46,6 @@ export default function Home() {
       <View className="flex-row justify-between mt-6">
         {/* Menu */}
         <View className="flex-row justify-end gap-5 bg-gray-100">
-          <TouchableOpacity className="bg-[#181C2E] w-14 h-14 rounded-full items-center justify-center ">
-            <AntDesign name="align-left" size={20} color="white" />
-          </TouchableOpacity>
-
           <View>
             <Text className="text-gray-500 text-xs">DELIVER TO</Text>
             <TouchableOpacity className="flex-row items-center mt-1">
@@ -91,7 +83,13 @@ export default function Home() {
       {/* CATEGORIES HEADER */}
       <View className="mt-7 flex-row justify-between items-center">
         <Text className="text-lg font-bold">All Categories</Text>
-        <Text className="text-gray-400">See All</Text>
+        <TouchableOpacity
+          // onPress={() => 
+          //   navigation.push("/tabs/AllCategories")
+          // }
+        >
+          <Text className="text-gray-400">See All</Text>
+        </TouchableOpacity>
       </View>
 
       {/* CATEGORY LIST */}
@@ -106,13 +104,22 @@ export default function Home() {
       {/* OPEN RESTAURANTS HEADER */}
       <View className="mt-8 flex-row justify-between items-center">
         <Text className="text-lg font-bold">Open Restaurants</Text>
-        <Text className="text-gray-400">See All</Text>
+        <TouchableOpacity
+          // onPress={() => .push("/tabs/AllCategories")}
+        >
+          <Text className="text-gray-400">See All</Text>
+        </TouchableOpacity>
       </View>
 
       {/* MEAL / RESTAURANT CARDS */}
       <View className="mt-5">
         {meals.map((meal) => (
-          <RestaurantCard key={meal?.idMeal } meal={meal} />
+          <TouchableOpacity
+            key={meal.idMeal}
+           onPress={() => router.push(`/recipe/${meal.idMeal}`)}
+          >
+            <RestaurantCard meal={meal} />
+          </TouchableOpacity>
         ))}
       </View>
 
